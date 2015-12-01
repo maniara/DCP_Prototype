@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="EUC-KR">
+<title>제품 내역 조회</title>
+<link type="text/css" href="https://code.jquery.com/ui/1.11.4/themes/sunny/jquery-ui.css" rel="stylesheet">
+<script src="https://code.jquery.com/jquery-2.1.4.js"></script>
+<script src="https://code.jquery.com/ui/1.11.4/jquery-ui.min.js"></script>
+<script>
+var merchantKey;
+$(document).ready(function(){
+	$("#QR_dialog").hide();
+	getKey();
+});
+
+function getKey(){
+	//alert("aa");
+	var query = window.location.search.substring(1);
+	merchantKey = query.split("=")[1];
+	
+	loadProduct();
+}
+
+function loadProduct(){
+	$.ajax({
+		url: '/service/Product/'+merchantKey,
+		type:'GET',
+		success:function(data){
+			//alert(JSON.stringify(data));
+			$.each(data, function(key,value){
+				//alert(value.dcPrice);
+				$("#list").append(
+						"<tr colspan='2'><td><h2>"+value.productName+"<h2></td></tr>"+
+						"<tr><td><img height='150' src='"+value.picUrl1+"'></td><td><img height='150' src='"+value.picUrl2+"'></td></tr>"+
+						"<tr><td colspan='2'>DC:"+value.dcPrice+"</td></tr><tr><td>Won:"+value.wonPrice+"</td></tr>"+
+						"<tr><td><input type='text' value='수량' id='number["+value.key+"]'></td>"+
+						"<td><input height='100' type='button' value='직접 지불'>"+
+						"<input height='100' type='button' value='지불 QR 코드 보기' id='showQR["+value.key+"]'>"
+						//"<input height='100' type='button' value='지불 QR 코드 보기' id='showQR'>"
+						//"<td><img height='100' src='http://www.chicagonow.com/digital-media-curator/files/2013/07/QR-code.jpg'</td></tr>"
+				);
+			})
+		},
+		error:function(error){alert(error);}
+	}).then(function(){
+		var quanity = 1;
+		
+		$(document).on("click", "input[id^='showQR[']", function(){
+			var productid=this.id.split("[")[1];
+			var productid = productid.replace("]","");
+			//var quanity = $("#number["+productid+"]").val();
+			//alert(quanity);
+			$("#debugComment").empty();
+			$("#debugComment").append("제품 ID:"+productid+"<br> 수량:"+quanity);
+			$("#QR_dialog").dialog();
+			  
+			//$("#QR_dialg").show();
+			});
+		
+		$(document).on("change", "input[id^='number[']", function(){
+			//quanity = $("#"+this.id).val();
+			quanity = $(this).val();
+			});
+	});
+	
+}
+</script>
+</head>
+<body>
+<div class="ui-widget-header ui-corner-top form_pad">
+<h1> 상품 내역</h1>
+<div class="ui-widget-content form_pad">
+<table id="list">
+</table>
+</div>
+</div>
+<div id="QR_dialog" title="QR Code">
+	<img src="/images/qr_code.png" height="100"></br>
+	<p id="debugComment"></p>
+	
+</div>
+</body>
+</html>

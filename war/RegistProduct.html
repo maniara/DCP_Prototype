@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="EUC-KR">
+<title>제품 등록</title>
+<link type="text/css" href="https://code.jquery.com/ui/1.11.4/themes/sunny/jquery-ui.css" rel="stylesheet">
+<script src="https://code.jquery.com/ui/1.11.4/jquery-ui.min.js"></script>
+<script src="https://code.jquery.com/jquery-2.1.4.js"></script>
+<script src="/js/Product.js"></script>
+<script>
+var merchantKey;
+$(document).ready(getKey);
+function getKey(){
+	var query = window.location.search.substring(1);
+	merchantKey = query.split("=")[1];
+	
+	addEvent();
+}
+
+function addEvent(){
+	$("#submit").click(function(){
+		var userAccount = $("#userAccount").val();
+		var name = $("#name").val();
+		var dcPrice = parseFloat($("#dcPrice").val());
+		var wonPrice = Number($("#wonPrice").val());
+		var merchantWalletAddress = $("#merchantWalletAddress").val();
+		var picUrl1 = $("#picUrl1").val();
+		var picUrl2 = $("#picUrl2").val();
+		//alert(dcPrice);
+		var p= new Product(merchantKey, name, dcPrice, wonPrice, merchantWalletAddress,picUrl1, picUrl2);
+		
+		$("p").html(JSON.stringify(p));
+		
+		$.ajax({
+			type:'POST',
+			url: '/service/Product',
+			//accept : "application/json",
+			contentType: 'application/json',
+			//dataType:'json',
+			data:JSON.stringify(p),
+			success:function(data,status,xhr){
+				alert("저장되었습니다.");
+				},
+			error:function(xhr,status,error){alert(error);}
+		});		
+	});
+}
+</script>
+</head>
+<body>
+<div class="ui-widget-header ui-corner-top form_pad">
+<h1> 상품등록 </h1>
+<div class="ui-widget-content form_pad">
+	상품 이름
+	<input type = "text" id="name"><br><br>
+	가격(디지털)
+	<input type = "text" id="dcPrice"><br><br>
+	가격(원)
+	<input type = "text" id="wonPrice"><br><br>
+	지불 지갑 코드
+	<input type = "merchantWalletAddress" id="merchantWalletAddress"><br><br>
+	사진 1
+	<input type = "text" id="picUrl1"><br><br>
+	사진2
+	<input type = "text" id="picUrl2"><br><br> 
+<input type="submit" id="submit" value="SUBMIT">
+<p></p>
+</div>
+</div>
+
+
+</body>
+</html>
+

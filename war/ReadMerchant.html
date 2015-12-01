@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="EUC-KR">
+<title>상점 정보 보기</title>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBw8Ka6-bVfAagisRWL-r-AZoNgU_3y5Lo&callback=initMap" async defer></script>
+<link type="text/css" href="https://code.jquery.com/ui/1.11.4/themes/sunny/jquery-ui.css" rel="stylesheet">
+<script src="https://code.jquery.com/ui/1.11.4/jquery-ui.min.js"></script>
+<script src="https://code.jquery.com/jquery-2.1.4.js"></script>
+<style>
+      html, body {
+        height: 80%;
+      }
+      #map {
+         min-width: 200px;
+		  width: 50%;
+		  min-height: 200px;
+		  height: 80%;
+		  border: 1px solid blue;
+      }
+</style>
+<script>
+var merchantKey;
+$(document).ready(getKey);
+$(window).bind("unload",getKey);
+function getKey(){
+	var query = window.location.search.substring(1);
+	merchantKey = query.split("=")[1];
+	loadMerchant();
+}
+
+function loadMap(lat, lng, name){
+	//alert(lat+":"+lng);
+	var map = new google.maps.Map(document.getElementById('map'), {
+  	    center: {lat: lat, lng: lng},
+		     zoom: 11
+		});
+	var marker = new google.maps.Marker({
+    	position: {lat: lat, lng: lng},
+    	map: map,
+    	title: name
+	    });
+}
+
+function initMap(){
+	//$("#map").html("Map position");
+	var map = new google.maps.Map(document.getElementById('map'), {
+  	    center: {lat: -34.397, lng: 150.644},
+		     zoom: 8
+		});
+}
+
+function loadMerchant(){
+	$.ajax({
+		url: '/service/Merchant/'+merchantKey,
+		type:'GET',
+		success:function(data){
+			$("#userAccount").html(data.userAccount);
+			$("#name").html(data.name);
+			$("#category").html(data.category);
+			$("#registNumber").html(data.registNumber);
+			$("#representatives").html(data.representatives);
+			$("#address").html(data.address);
+			$("#tel").html(data.tel);
+			//alert(data.logoUrl);
+			if(data.logoUrl == null || data.logoUrl == "")
+				$("#logo").attr("src","/images/defLogo.png")
+			else
+				$("#logo").attr("src",data.logoUrl)
+			loadMap(data.latitude, data.longitude, data.name);
+			//initMap();
+			
+			$("#showProductLink").attr("href","/RetrieveProduct.html?id="+data.key);
+			$("#registProductLink").attr("href","/RegistProduct.html?id="+data.key);
+		},
+		error:function(error){alert(error);}
+	});
+}
+</script>
+</head>
+<body>
+<div class="ui-widget-header ui-corner-top form_pad">
+<h1> 상점 정보 </h1>
+<div class="ui-widget-content form_pad">
+	<img height = "80" id="logo"><br>
+	<a id="showProductLink"><input type="button" id="showMenu" value="상품보기"></a>
+	<a id="registProductLink"><input type="button" id="registMenu" value="상품등록"></a><br><br>
+	회원 계정 :<div id="userAccount"></div><br><br>
+	상호명 :<div id="name"></div><br><br>
+	업종 :
+	<div id="category"></div><br><br>
+	사업자 번호 :
+	<div id="registNumber"></div><br><br>
+	대표 :
+	<div id="representatives"></div><br><br>
+	주소 :
+	<div id="address"></div><br><br>
+
+	전화번호 :
+	<div id="tel"></div><br><br>
+	위치
+	<div id="map"></div> 
+	</div>
+	</div>
+</body>
+</html>

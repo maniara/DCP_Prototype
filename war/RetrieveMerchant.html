@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="EUC-KR">
+<link type="text/css" href="https://code.jquery.com/ui/1.11.4/themes/sunny/jquery-ui.css" rel="stylesheet">
+<script src="https://code.jquery.com/ui/1.11.4/jquery-ui.min.js"></script>
+<script src="https://code.jquery.com/jquery-2.1.4.js"></script>
+<script>
+$(document).ready(loadMerchant);
+function loadMerchant(){
+	$.ajax({
+		url: '/service/Merchant',
+		type:'GET',
+		success:function(data){
+			$.each(data, function(key,value){
+				$("#list").append("<tr><td><a href='ReadMerchant.html?id="+value.key+"'><font color='#444'>"+value.name+"</font></a></td>"
+						+"<td>"+value.category+"</td>"+"<td>"+value.address+"</td></tr>");
+			})
+		},
+		error:function(error){alert(error);}
+	});
+}
+</script>
+<title>상점 내역 조회</title>
+</head>
+<body>
+<div class="ui-widget-header ui-corner-top form_pad">
+<h1> 상점 내역</h1>
+<div class="ui-widget-content form_pad">
+<table id="list" border='1'>
+<tr>
+<td>상호명</td><td>업종</td><td>주소</td>
+
+</tr>
+</table>
+</div>
+</div>
+</body>
+</html>

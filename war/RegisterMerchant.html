@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="EUC-KR">
+<title>Register Merchant</title>
+<link type="text/css" href="https://code.jquery.com/ui/1.11.4/themes/sunny/jquery-ui.css" rel="stylesheet">
+<script src="https://code.jquery.com/jquery-2.1.4.js"></script>
+<script src="https://code.jquery.com/ui/1.11.4/jquery-ui.min.js"></script>
+<script src="/js/Merchant.js"></script>
+<script>
+function Coordinator(lat,lng){
+	this.lat = lat;
+	this.lng = lng
+}
+
+function getLocation(addr) {
+	var address = encodeURIComponent(addr)
+    var geocode = "http://maps.googleapis.com/maps/api/geocode/json?sensor=false&language=ko&address=["+address+"]";
+	//alert(geocode);
+    jQuery.ajax({
+        url: geocode,
+        type: 'POST',
+           success: function(myJSONResult){
+                    if(myJSONResult.status == 'OK') {
+                    	//alert("success");
+                    	var lat = myJSONResult.results[0].geometry.location.lat;
+                    	var lng = myJSONResult.results[0].geometry.location.lng;
+            			$("#latitude").val(lat);
+            			$("#longitude").val(lng);
+                    	//alert(position.lat+":"+position.lng);
+                    } else if(myJSONResult.status == 'ZERO_RESULTS') {
+                        alert("지오코딩이 성공했지만 반환된 결과가 없음을 나타냅니다.\n\n이는 지오코딩이 존재하지 않는 address 또는 원격 지역의 latlng을 전달받는 경우 발생할 수 있습니다.")
+                    } else if(myJSONResult.status == 'OVER_QUERY_LIMIT') {
+                        alert("할당량이 초과되었습니다.");
+                    } else if(myJSONResult.status == 'REQUEST_DENIED') {
+                        alert("요청이 거부되었습니다.\n\n대부분의 경우 sensor 매개변수가 없기 때문입니다.");
+                    } else if(myJSONResult.status == 'INVALID_REQUEST') {
+                        alert("일반적으로 쿼리(address 또는 latlng)가 누락되었음을 나타냅니다.");
+                    }
+            }
+    });
+}
+
+	$(document).ready(function(){
+		$("#place").selectmenu();
+		$("#getLocation").click(function(){
+			var address = $("#address").val();
+			getLocation(address);
+
+			});
+		
+		$("#submit").click(function(){
+			var userAccount = $("#userAccount").val();
+			var name = $("#name").val();
+			var category = $("#category").val();
+			var registNumber = $("#registNumber").val();
+			var representatives = $("#representatives").val();
+			var address = $("#address").val();
+			var tel = $("#tel").val();
+			var logoUrl = $("#logoUrl").val();
+			var latitude = Number($("#latitude").val());
+			var longitude = Number($("#longitude").val());
+			
+			var m = new Merchant(userAccount, name, category, registNumber, representatives, address, tel, logoUrl, latitude, longitude);
+			$("p").html("SEND:"+JSON.stringify(m));
+
+			$.ajax({
+				type:'POST',
+				url: '/service/Merchant',
+				//accept : "application/json",
+				contentType: 'application/json',
+				//dataType:'json',
+				data:JSON.stringify(m),
+				success:function(data,status,xhr){
+					alert("저장되었습니다.");
+					window.location.replace("/");
+					},
+				error:function(xhr,status,error){alert(error);}
+			});
+		});
+	});
+</script>
+</head>
+<body>
+<div class="ui-widget-header ui-corner-top form_pad">
+<h1> 상점등록 </h1>
+<div class="ui-widget-content form_pad">
+	회원 계정
+	<input type = "text" id="userAccount" value="TestAccount"><br><br>
+	상호명
+	<input type = "text" id="name"><br><br>
+	업종
+	<select id="category">
+	<option>카페</option>
+	<option>한식당</option>
+	<option>중식당</option>
+	<option>양식당</option>
+	<option>분식당</option></select><br><br>
+	사업자 번호
+	<input type = "text" id="registNumber"><br><br>
+	대표
+	<input type = "text" id="representatives"><br><br>
+	주소
+	<input type = "text" id="address"> <input type='button' id='getLocation' value="위치 설정"><br><br> 
+	전화번호
+	<input type = "text" id="tel"><br><br>
+	로고
+	<input type = "text" id="logoUrl"><br><br>
+	위치
+	위도
+	<input type = "text" id="latitude"><br><br>
+	경도
+	<input type = "text" id="longitude"><br><br>
+	
+<input type="submit" id="submit" value="SUBMIT">
+</div>
+</div>
+<p>
+</p>
+</body>
+</html>
